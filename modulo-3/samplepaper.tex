@@ -1,0 +1,259 @@
+% This is samplepaper.tex, a sample chapter demonstrating the
+% LLNCS macro package for Springer Computer Science proceedings;
+% Version 2.21 of 2022/01/12
+%
+\documentclass[runningheads]{llncs}
+%
+\usepackage[T1]{fontenc}
+% T1 fonts will be used to generate the final print and online PDFs,
+% so please use T1 fonts in your manuscript whenever possible.
+% Other font encondings may result in incorrect characters.
+%
+\usepackage{graphicx}
+% Used for displaying a sample figure. If possible, figure files should
+% be included in EPS format.
+%
+% If you use the hyperref package, please uncomment the following two lines
+% to display URLs in blue roman font according to Springer's eBook style:
+%\usepackage{color}
+%\renewcommand\UrlFont{\color{blue}\rmfamily}
+%\urlstyle{rm}
+%
+\usepackage{listings}
+\usepackage{xcolor} % Para poder usar colores
+\usepackage{pdfpages}
+\usepackage{hyperref}
+
+\lstset{
+    language=HTML,
+    basicstyle=\ttfamily\small,      % Fuente monoespaciada
+    keywordstyle=\color{blue},       % Etiquetas en azul
+    stringstyle=\color{orange},      % Texto entre comillas en naranja
+    commentstyle=\color{gray},       % Comentarios en gris
+    breaklines=true,                 % Ajustar líneas largas
+    frame=single,                    % Pone el recuadro (cuadrado)
+    numbers=left,                    % Números de línea a la izquierda
+    numberstyle=\tiny\color{gray},   % Estilo de los números
+    showstringspaces=false,          % No mostrar espacios marcados
+}
+\begin{document}
+%
+\title{Modulo 3: Avogadro Toast}
+%
+%\titlerunning{Abbreviated paper title}
+% If the paper title is too long for the running head, you can set
+% an abbreviated paper title here
+%
+\author{Lucia Salamone \and
+Lucas Segura \and
+Pilar Mujica\and
+Sara Kemelmajer\and
+Rocio Martinez\and
+Caterina Dinnocenzo}
+%
+\authorrunning{L. Salamone}
+% First names are abbreviated in the running head.
+% If there are more than two authors, 'et al.' is used.
+%
+\institute{Universidad Nacional de Cuyo, Instituto de Ingenería Industrial POBOX 5502 %\and
+%Springer Heidelberg, Tiergartenstr. 17, 69121 Heidelberg, Germany
+\email{luchisalamone10@gmail.com}\\
+\url{https://ingenieria.uncuyo.edu.ar/}} %\and
+%ABC Institute, Rupert-Karls-University Heidelberg, Heidelberg, Germany\\
+%\email{\{abc,lncs\}@uni-heidelberg.de}}
+%
+\maketitle              % typeset the header of the contribution
+%
+\begin{abstract}
+Este documento técnico presenta un análisis operativo y una guía metodológica para el modelado dinámico de una planta de fabricación de aceite de oliva utilizando el software SIMUL8. El sistema bajo estudio simula un proceso estocástico caracterizado por una doble entrada independiente de materia prima, diseñado para evaluar la capacidad de absorción de la planta y la estabilidad de los buffers de almacenamiento durante la campaña estacional. A lo largo del desarrollo, se abordan los fundamentos de uso de la herramienta de simulación, la parametrización de sus componentes clave y los desafíos técnicos experimentados durante la fase de ejecución, tales como restricciones de acceso al sistema de archivos por codificación de caracteres especiales y la posterior identificación de un cuello de botella crítico en la actividad de molienda y batido. Finalmente, se proponen estrategias de optimización basadas en las métricas de utilización arrojadas por el motor estocástico del software.
+
+\keywords{UNCuyo \and TyHM \and markuo language.}
+\end{abstract}
+%
+%
+%
+\section{Introducción y Planteamiento del Problema}
+
+El uso de herramientas de simulación estocástica como SIMUL8 permite a las organizaciones analizar de forma segura y económica el comportamiento de sistemas complejos antes de implementar cambios físicos en el entorno real. En este proyecto, el foco está puesto en la optimización operativa de una planta de fabricación de aceite de oliva que procesa materia prima proveniente de una doble línea de suministro.Sin embargo, el desarrollo e intercambio de modelos de simulación digital entre equipos de trabajo suele enfrentarse a retos que van desde la compatibilidad de infraestructura informática hasta la necesidad de ajustar las reglas de negocio a la realidad analítica del proceso. Este documento aborda de forma integrada ambos aspectos.
+1.1. Incidencia Técnica en el Sistema de Archivos y SoluciónDurante la fase inicial de revisión colaborativa del modelo, se identificó una restricción crítica que impedía la apertura y correcto procesamiento del archivo fuente con extensión .S8. Al intentar ejecutar la simulación, el software interrumpía la carga desplegando un aviso de error de acceso.El diagnóstico técnico determinó que la falla no residía en una corrupción interna del código o del layout, sino en un conflicto de codificación de caracteres en la ruta del directorio local (específicamente por la presencia de un caracter especial "tilde" en el nombre de la carpeta contenedora: Industria Producción de Aceite de Oliva). Motores de bases de datos de versiones específicas de SIMUL8 y ciertos sistemas de gestión de archivos temporales de Windows presentan problemas para mapear caracteres no pertenecientes al estándar ASCII básico (como acentos o eñes). Al interpretar la cadena de texto con el formato incorrecto, el software pierde el puntero del archivo y asume que este se encuentra bloqueado o inexistente.La solución implementada consistió en una reestructuración de la ruta del directorio, migrando el archivo a una ubicación raíz limpia en el disco local y eliminando cualquier tilde o espacio complejo en los nombres de los archivos. Con esta acción de saneamiento informático, el motor de SIMUL8 recuperó la capacidad de lectura de variables de forma inmediata.
+1.2. Requerimientos de Reingeniería del Modelo (Correcciones del Docente)Una vez estabilizado el entorno técnico, y tras una evaluación preliminar del flujo, el docente a cargo planteó una serie de correcciones y ampliaciones obligatorias. Estas modificaciones buscan transformar el modelo base en una representación mucho más madura, precisa y ajustada a los costos y estacionalidades reales de una almazara industrial. Las directrices de reingeniería de la simulación se estructuran en cinco ejes fundamentales:
+ \begin{enumerate}
+    \item \textbf{Modelado y Costeo de Mano de Obra en Cajas:} Se requiere la incorporación de dos cajeros específicos para el área de despacho o transacciones comerciales. La configuración debe reflejar el impacto financiero del sistema mediante la asignación de sueldos por hora para cada operario. Estructuralmente, trabajarán en turnos diferenciados que contemplan una superposición de una (1) hora diaria de solape operativo para la entrega de caja y empalme de tareas, con excepción de los días sábados, donde la jornada responde a una dinámica lineal o reducida.
+    
+    \item \textbf{Ajuste Estocástico de la Demanda de Clientes:} Se debe reparametrizar el comportamiento de las llegadas de los clientes compradores. La tasa de arribo se modificará a una distribución exponencial con un promedio de 0.25 horas (equivalente matemáticamente a la llegada de un cliente cada 15 minutos en promedio). Este flujo debe sincronizarse de forma directa mediante la lógica nativa de SIMUL8 que vincula la cola de espera de clientes con la estación de atención en caja.
+    
+    \item \textbf{Integración de Líneas de Suministros Críticos (Energía y Combustible):} El modelo debe expandir sus fronteras para conectar la línea principal actual con dos flujos de soporte técnico y de costos:
+    \begin{itemize}
+        \item \textit{Línea de Abastecimiento de Combustible:} Flujo continuo destinado a alimentar la caldera industrial, la cual está integrada físicamente dentro del bloque macro de Molienda y Batido para los procesos de termobasculación de la masa de oliva.
+        \item \textit{Línea de Consumo Eléctrico (EDEMSA):} Representación simbólica del personal técnico de la distribuidora energética que realiza la lectura del medidor y la gestión del cobro. Este nodo funcionará como el centro colector donde se concentrarán y computarán todos los gastos de luz y fuerza motriz consumidos por las diversas máquinas distribuidas en la planta.
+    \end{itemize}
+    
+    \item \textbf{Escalamiento Temporal y Modelado de la Estacionalidad (Temporalidad):} Para poder reflejar la altísima dependencia estacional de la industria del aceite de oliva, la unidad de tiempo de la simulación debe transcurrir en meses. Esta escala permitirá programar de forma precisa los ``trabajos de temporada''. Esto incluye la activación y desactivación periódica de contratos para cosechadores, empresas de logística especializadas en trasladar la cosecha del campo a la almazara, y el despacho del concentrado de aceituna remanente que se comercializa de forma externa con destino a la industria cosmética.
+    
+    \item \textbf{Especialización del Personal de Mantenimiento:} Se exige segmentar los recursos humanos técnicos de la planta. Se deben separar explícitamente las funciones, capacidades y disponibilidad de los técnicos de línea (enfocados en la continuidad mecánica general y cintas) de los técnicos específicos de almazara (dedicados en exclusiva a las tareas críticas de extracción, calibración del decanter y batidoras).
+\end{enumerate}
+
+
+
+
+\section{Componentes de la Simulación}
+
+El modelo en SIMUL8 se divide en tres bloques funcionales que representan la cadena productiva, el sector comercial y los recursos de soporte:
+
+\subsection{Línea de Producción y Almazara}
+\begin{description}
+    \item[Recepción de Fruto (Start Point):] Punto de llegada en camión de las aceitunas cosechadas desde las fincas.
+    \item[Tolva de Espera (Queue):] Almacenamiento pulmón que absorbe la variabilidad de los arribos y regula el ingreso a la planta.
+    \item[Lavado y Desalojado (Activity):] Elimina impurezas físicas y descarta el material no apto hacia un depósito de residuos.
+    \item[Molienda y Batido (Activity):] Trituración y calentamiento de la masa de oliva (operación vinculada a la caldera y al suministro de combustible).
+    \item[Centrifugación / Decanter (Activity):] Separa el aceite del alpeorujo por densidad. El residuo sólido es derivado a la línea inferior de \textit{Procesamiento y Secado}, mientras que el aceite sigue el flujo principal.
+    \item[Clasificación (Activity):] Distribuye el aceite según su variedad hacia tres \textbf{Tanques de Almacenamiento Intermedio}.
+    \item[Embotellado Arauco, Arbequina y Picual (Activities):] Tres líneas paralelas de envasado independiente para cada una de las variedades de aceite de oliva.
+    \item[Empaquetadora (Activity):] Punto de convergencia donde las botellas se agrupan en cajas comerciales.
+    \item[Almacén (Queue):] Inventario final de producto terminado acumulado antes del despacho.
+\end{description}
+
+\subsection{Módulo Comercial e Interacción con Clientes}
+\begin{description}
+    \item[Llegada de Clientes (Start Point):] Flujo de entrada de los compradores con una distribución exponencial configurada en un promedio de 0.25 horas.
+    \item[Fila de Espera (Queue):] Línea donde los clientes aguardan su turno de atención, permitiendo medir el nivel de servicio.
+    \item[Caja (Activity):] Punto de cobro y facturación final atendido por los cajeros del establecimiento.
+    \item[Salida de Clientes (End Storage):] Registro de salida de los compradores que finalizan con éxito su transacción.
+\end{description}
+
+\subsection{Recursos y Personal}
+\begin{description}
+    \item[Técnicos de Almazara (4 Operarios):] Personal técnico especializado asignado exclusivamente al mantenimiento y calibración de las fases críticas de extracción (Lavado, Molienda, Centrifugación y Clasificación).
+    \item[Personal de Línea (5 Operarios):] Equipo encargado de las tareas de envasado, empaque y del control del centro de gastos de energía eléctrica de EDEMSA.
+\end{description}
+
+
+\section{Personalización Visual y Entorno de la Simulación}
+
+Para facilitar la interpretación de los datos y mejorar la experiencia del usuario final, el modelo fue sometido a un proceso de diseño e identidad visual dentro de SIMUL8. Estas configuraciones permiten transformar un flujo abstracto de datos en una representación intuitiva del layout físico de la empresa.
+
+\subsection{Segmentación del Entorno mediante Subventanas (Sub-windows)}
+Como se observa en el diseño, el modelo se estructuró visualmente dividiendo la pantalla en dos bloques delimitados por recuadros independientes:
+\begin{itemize}
+    \item \textbf{Bloque Izquierdo (Sector Comercial):} Contiene exclusivamente el flujo de los clientes y la caja de cobro, aislando el comportamiento de la demanda del resto de la fábrica.
+    \item \textbf{Bloque Derecho (Planta Industrial / Almazara):} Delimita todo el proceso productivo continuo, desde el arribo del camión hasta el paletizado en la empaquetadora.
+\end{itemize}
+Esta separación evita la saturación visual en la pantalla principal y permite que un analista se enfoque en el rendimiento de un área específica (comercial o industrial) sin perder la conexión lógica del sistema global.
+
+\subsection{Personalización de Iconos e Identidad Gráfica}
+En lugar de utilizar los bloques genéricos predeterminados de SIMUL8, se realizó una sustitución estratégica de los gráficos de cada objeto para reflejar la realidad del ecosistema del aceite de oliva:
+\begin{itemize}
+    \item \textbf{Materia Prima y Residuos:} El punto de entrada se personalizó con el icono de un camión tolva de carga pesada, y la salida de deshechos del lavado con un contenedor de residuos, haciendo evidente a primera vista dónde se pierde material.
+    \item \textbf{Maquinaria de Proceso:} Actividades críticas como la molienda, el decanter de centrifugación y el filtrado utilizan gráficos que emulan la maquinaria de acero inoxidable real de una almazara.
+    \item \textbf{Almacenamiento e Inventario:} Para los pulmones de aceite de las variedades Arauco, Arbequina y Picual se configuraron iconos de tanques cilíndricos de almacenamiento industrial, mientras que las colas de producto terminado muestran cajas apiladas listas para logística.
+\end{itemize}
+
+\subsection{Marcadores Dinámicos de Control}
+Encima de cada cola (\textit{Queue}) y actividad (\textit{Activity}) se mantuvieron activos los contadores numéricos en tiempo real. Durante la ejecución de la simulación, estos marcadores permiten ver de forma instantánea:
+\begin{enumerate}
+    \item El número exacto de clientes esperando en la fila de la caja.
+    \item Cuántos lotes de masa de aceituna están retenidos en las tolvas previas a la centrifugación.
+    \item Si las líneas de embotellado paralelas están trabajando simultáneamente o si alguna se encuentra vacía por falta de stock en su respectivo tanque.
+\end{enumerate}
+
+
+\section{Funcionamiento Detallado de la Simulación}
+
+El modelo final integrado en SIMUL8 no solo representa el flujo físico de la materia prima, sino que incorpora las reglas de negocio, restricciones laborales y dinámicas estacionales solicitadas en la reingeniería del sistema. Su funcionamiento operativo se rige bajo los siguientes pilares:
+
+\subsection{Dinámica Laboral y Gestión de Turnos en Caja}
+El área comercial (bloque izquierdo) opera mediante un esquema de personalización de horarios (\textit{Shift Patterns}) para los dos cajeros contratados. Para modelar el costo y la continuidad del servicio, se configuraron las siguientes reglas:
+\begin{itemize}
+    \item \textbf{Estructura de Costos:} Cada cajero tiene asignado un costo laboral directo indexado por hora de trabajo, lo que permite evaluar el impacto del gasto de personal sobre el margen de venta del aceite.
+    \item \textbf{Solape Operativo:} De lunes a viernes, los turnos están programados para superponerse exactamente durante una (1) hora cada día. Este solape asegura que la estación de servicio nunca quede vacía, permitiendo realizar el arqueo de caja, la transferencia de valores y el traspaso de información sin interrumpir la atención de los clientes en fila.
+    \item \textbf{Excepción de Jornada:} Los días sábados se programó un turno lineal restringido sin superposición, adaptándose a la reducción del flujo comercial del fin de semana.
+\end{itemize}
+
+\subsection{Sincronización Estocástica de la Demanda}
+Las llegadas al nodo \textit{Llegada de Clientes} se gobiernan mediante una distribución exponencial con una media de $0.25$ horas. Esto significa que, aunque el promedio matemático es de un cliente cada 15 minutos, el motor de SIMUL8 genera intervalos variables (picos de alta concurrencia y momentos de calma). 
+
+A través de la lógica interna de \textit{Routing-Out}, los clientes se dirigen automáticamente a la cola de espera, la cual está vinculada a la actividad \textit{Caja}. El objeto \textit{Caja} extrae de forma automática a los clientes de la fila solo si el recurso ``Cajero'' se encuentra activo en su turno correspondiente, modelando con total realismo los tiempos de espera y el abandono del sistema.
+
+\subsection{Acoplamiento de Suministros Críticos y Centros de Costos}
+El funcionamiento de la almazara se enriqueció mediante la conexión de dos líneas de soporte que actúan como sumideros de costos operativos:
+\begin{itemize}
+    \item \textbf{Línea de Combustible y Caldera:} La actividad de \textit{Molienda y Batido} requiere un flujo térmico constante para que las batidoras mantengan la masa de aceituna a una temperatura controlada (alrededor de 27-30°C). Se vinculó una línea de suministro que simula el consumo de combustible de la caldera, midiendo el gasto energético asociado a la termo-extracción.
+    \item \textbf{Línea de Control Energético (EDEMSA):} Se estructuró un bloque independiente donde el técnico de EDEMSA computa la lectura del medidor. Este nodo absorbe las tasas de consumo eléctrico variables de los motores del decanter, las embotelladoras paralelas y la empaquetadora, centralizando el costo de la fuerza motriz de toda la planta en una sola métrica financiera.
+\end{itemize}
+
+\subsection{Escalamiento Temporal y Estacionalidad de Campaña}
+Para capturar la naturaleza agrícola del proceso, el reloj de la simulación se configuró para transcurrir en \textbf{meses}. Esto permitió programar eventos lógicos condicionales para los ``trabajos de temporada'':
+\begin{itemize}
+    \item \textbf{Cosecha y Logística:} Durante los meses de alta campaña (invierno), el modelo activa los recursos de cosechadores y las empresas de logística contratadas, disparando el flujo de camiones en la entrada. Fuera de temporada, estos bloques se desactivan automáticamente, simulando la planta en mantenimiento o a baja capacidad.
+    \item \textbf{Subproductos de Exportación:} El concentrado de aceituna o alpeorujo remanente del proceso de secado se acumula mensualmente para activar despachos logísticos masivos con destino externo a la industria de cosméticos, generando una unidad de negocio secundaria dentro del modelo.
+\end{itemize}
+
+\subsection{Especialización de Mantenimiento}
+Los recursos humanos técnicos se segregaron para evitar la simulación de polifuncionalidad irreal. Si ocurre una avería en las embotelladoras, el sistema invoca exclusivamente al personal del \textit{Técnicos de Línea}. Por el contrario, si el decanter o las batidoras sufren un desajuste en la densidad, la actividad se detiene y bloquea hasta que uno de los 4 \textit{Técnicos de Almazara} quede libre, reflejando el verdadero impacto de los tiempos de reparación en la zona de extracción.
+
+
+\section{Simplificaciones, Limitaciones y Ajustes del Modelo}
+
+Para lograr la ejecución estable del motor estocástico de SIMUL8 y garantizar la viabilidad del proyecto dentro de los márgenes del conocimiento operativo del equipo, se debieron aplicar simplificaciones estructurales sobre el modelo idealizado inicialmente. A continuación, se detallan los ejes modificados respecto de los requerimientos teóricos:
+
+\subsection{Escala Temporal y Trabajo por Temporadas}
+A pesar de que la industria del aceite de oliva posee una dependencia estrictamente estacional determinada por el calendario agronómico (con una cosecha óptima que transcurre de marzo a junio para evitar la fermentación del fruto), la versión utilizada de SIMUL8 limita la unidad de tiempo máxima a días, impidiendo la configuración nativa de turnos y contratos basados en meses. 
+
+Para no poner en compromiso los demás puntos de trabajo, se mantuvo la unidad de tiempo base en \textbf{minutos}. Con el objetivo de simular el comportamiento estacional de manera indirecta y definir los turnos de trabajo para todo el año, se parametrizó la entrada de cada camión mediante una distribución exponencial con una media de \textbf{100 minutos}. Esto equivale teóricamente a procesar algo más de 5 camiones (unas 131 toneladas de aceituna anuales), una escala correspondiente a una almazara boutique.
+
+\subsection{Logística de Entrada y Lógica de ``Packs''}
+En una operación real, un camión con una carga aproximada de 25 toneladas requeriría la descarga simultánea de unos 20,000 paquetes de aceitunas de 1.2 kg para transformarse cada uno en una botella de 500 ml. Al intentar procesar este volumen masivo de entidades de forma simultánea, el motor de la simulación sufría desbordamientos y se trababa por completo al momento del arribo.
+
+La solución aplicada consistió en escalar la representación visual y lógica: cada camión simulado ingresa al sistema transportando únicamente \textbf{20 packs} de aceitunas (donde la animación visual de una aceituna representa 20 packs comprimidos). Para que esta reducción no distorsionara el balance financiero, se estableció una equivalencia matemática donde 1,000 entradas de camiones virtuales corresponden a 1 viaje real de 25 toneladas.
+
+\subsection{Análisis Financiero y Estructura de Costos Operativos}
+El impacto financiero del flujo logístico de entrada se indexó directamente en el motor de costos (\textit{Cost per Unit}) a través de un valor de \textbf{\$690 ARS por pack de aceitunas} puesto en la tolva de recepción. Este valor se calculó de forma proporcional basándose en las variables comerciales reales de la provincia de Mendoza:
+\begin{itemize}
+    \item El costo del cajón de aceituna base de 20 kg destinada a molienda, cotizado en torno a los \textbf{\$5,400 ARS}.
+    \item El costo de recolección oficial fijado por la Unión Argentina de Trabajadores Rurales y Estibadores (UATRE) de \textbf{\$5,200 ARS} por cajón para los cosechadores.
+    \item El contrato de una empresa de logística para la carga, traslado y descarga de las 25 toneladas desde la finca hasta la fábrica, tasado en \textbf{\$550,000 ARS} por viaje completo.
+\end{itemize}
+De este modo, el costo total real de un envío (\$13,800,000 ARS) se distribuyó de manera exacta entre los 20,000 packs lógicos (\$13,800,000 / 20,000 = \$690 ARS).
+
+\subsection{Redefinición de Suministros y Recursos Humanos}
+\begin{itemize}
+    \item \textbf{Alimentación de Combustible Externo:} Dado que la biomasa derivada del residuo sólido (alperujo) se comercializa en su totalidad a la industria cosmética externa (60\% del centrifugado), no fue posible reutilizarla internamente como autocombustible. Por ello, se acopló una línea de alimentación de biomasa comercial externa hacia el bloque de molienda y batido mediante una conexión de tipo puerta de entrada. Con una dosificación estándar del 1\% al 1.5\% sobre el peso de la aceituna, se fijó un costo financiero de \textbf{\$5.7 ARS por pack de biomasa}.
+    \item \textbf{Simplificación de Técnicos y Consumo Eléctrico:} Para evitar complejidades críticas en el layout visual, los recursos humanos se consolidaron en dos categorías unificadas con una remuneración base de \textbf{\$12,000/h (\$200/min)} siguiendo el convenio del Complejo Industrial Oleaginoso. Los 4 técnicos de almazara cubren las tareas desde el lavado hasta la centrifugación, mientras que los 5 técnicos de línea absorben los procesos desde la centrifugación hasta la caja comercial. El gasto eléctrico se simplificó asignando a cada máquina un valor estándar de uso por minuto.
+    \item \textbf{Gastos Fijos (Financial Overheads):} Se cargó en el software un monto fijo de \textbf{\$350,000 ARS} correspondientes a una semana de trabajo para computar sueldos administrativos, personal de seguridad, pólizas de seguros de la infraestructura y contratos de mantenimiento técnico de la planta.
+\end{itemize}
+
+
+\section{Análisis de Errores Operativos y Depuración (Debugging)}
+
+Durante la fase de puesta en marcha y ejecución del modelo en SIMUL8, se identificaron y subsanaron tres fallas críticas relacionadas con el balance de capacidades, la lógica de ruteo y la sincronización de la demanda:
+
+\subsection{Saturación y Cuello de Botella en la Tolva de Recepción}
+\begin{itemize}
+    \item \textbf{El Problema:} En los primeros ensayos de la simulación, se detectó un estancamiento masivo e ininterrumpido de producto en la \textit{Tolva de Recepción} (el primer pulmón de almacenamiento). Esto ocurría porque las etapas posteriores del proceso continuo (\textit{Lavado y Desalojado}, \textit{Molienda y Batido}, y \textit{Centrifugación}) operaban a una velocidad muy lenta en comparación con la tasa estocástica de arribos, bloqueando la fluidez de la planta.
+    \item \textbf{Solución Implementada:} Se realizó una calibración operativa sobre las propiedades de las actividades implicadas, achicando el tiempo de trabajo asignado a cada una de ellas para incrementar la tasa de absorción y evacuar la tolva inicial de manera eficiente.
+\end{itemize}
+
+\subsection{Fallo de Distribución por Atributos en las Variantes de Aceite}
+\begin{itemize}
+    \item \textbf{El Problema:} Para segmentar las tres variedades de aceite (Arauco, Arbequina y Picual), se pretendía utilizar la opción \textit{Label} de SIMUL8, asignando a cada paquete de aceitunas un número aleatorio del 1 al 3 para distribuirlos en la etapa de \textit{Clasificación}. En la práctica, la condición lógica fallaba y el software enviaba el flujo únicamente hacia dos de los tres tanques intermedios, dejando uno vacío y haciendo imposible completar de manera balanceada los lotes de empaque.
+    \item \textbf{Solución Implementada:} Se eliminó la aleatoriedad de los atributos y se modificó la lógica de salida (\textit{Routing Out}) del centro de trabajo de \textit{Clasificación} hacia una configuración en forma de circulación estricta (\textbf{``Circulate''}). De esta manera, el programa envía cada paquete hacia cada tanque en un orden consecutivo y cíclico, estabilizando el stock del varietal.
+\end{itemize}
+
+\subsection{Descalce entre el Flujo Comercial y la Capacidad de Planta}
+\begin{itemize}
+    \item \textbf{El Problema:} El bloque de interacción con clientes experimentó un quiebre de stock crítico debido a un desbalance estocástico: la tasa de arribo de compradores al local era significativamente mayor que la velocidad de procesamiento de la empaquetadora, provocando que llegaran más clientes que la cantidad de paquetes de aceite listos para la venta.
+    \item \textbf{Solución Implementada:} El equilibrio del sistema global se restituyó mediante una doble corrección paramétrica: se disminuyó la frecuencia de llegada de clientes (reduciendo la cantidad estocástica de arribos al local) y, simultáneamente, se aumentó la velocidad de la línea de producción industrial, logrando una sincronización exacta.
+\end{itemize}
+
+
+\section{Resultados y Conclusión del Estudio de Simulación}
+
+La reingeniería y posterior estabilización del modelo de la almazara en SIMUL8 permite extraer conclusiones fundamentales para la toma de decisiones estratégicas, tanto en el plano operativo de desarrollo como en la viabilidad técnico-económica del negocio.
+
+Por un lado, la resolución de las incidencias del ruteo por circulación (\textit{Circulate}) y la reconfiguración de las unidades de tiempo y volumen lógicos demuestran que el modelado digital requiere un balance constante entre la fidelidad del proceso físico y las capacidades de procesamiento del software de eventos discretos. Simplificar la cantidad de paquetes por camión y ajustar los tiempos de ciclo en la molienda permitieron eliminar un cuello de botella matemático que inhabilitaba el análisis del layout.
+
+Por otro lado, la integración de la matriz financiera dota a esta simulación de una excelente sensibilidad comercial. Al ejecutar el escenario definitivo sobre una semana útil de trabajo (excluyendo las primeras 4 horas de estabilización o \textit{warm-up}), y fijando un precio de venta de \textbf{\$50,000 ARS} por caja (de 3 botellas) y de \textbf{\$12.5 ARS} por kilogramo de alperujo comercializado, el sistema arrojó un costo operativo de \$8,924,608.88 ARS y un nivel de facturación de \$11,063,000.00 ARS. 
+
+Esto consolida una \textbf{ganancia neta semanal de \$2,138,391.12 ARS}. Tomando como referencia que una microalmazara boutique de esta magnitud requiere una inversión de capital inicial (CapEx) en maquinaria de entre \$150,000,000 y \$200,000,000 ARS, el proyecto simula un Retorno de Inversión (ROI) óptimo de \textbf{menos de dos años}, validando la sostenibilidad financiera del emprendimiento bajo condiciones estables de operación.
+
+\end{document}
